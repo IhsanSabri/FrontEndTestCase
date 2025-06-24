@@ -26,6 +26,7 @@ const translations = {
       save: 'Save',
       cancel: 'Cancel',
       deleteSelected: 'Delete Selected',
+      selecAll: 'Select All'
     },
     departments: {
       analytics: 'Analytics',
@@ -75,7 +76,8 @@ const translations = {
       delete: 'Sil',
       save: 'Kaydet',
       cancel: 'İptal',
-      deleteSelected: 'Seçilenleri Sil'
+      deleteSelected: 'Seçilenleri Sil',
+      selecAll: 'Hepsini Seç'
     },
     departments: {
       analytics: 'Analitik',

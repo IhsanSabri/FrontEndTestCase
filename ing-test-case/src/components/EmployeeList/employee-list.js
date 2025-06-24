@@ -2,7 +2,14 @@ import { LitElement, html } from "lit";
 import { Router } from "@vaadin/router";
 import store from "../../store/index.js";
 import { getTranslation, getCurrentLanguage } from "../../utils/i18n.js";
-import { trashIcon, editIcon, listIcon, tableIcon, prevIcon, nextIcon } from "../../icons/icon-folder.js";
+import {
+  trashIcon,
+  editIcon,
+  listIcon,
+  tableIcon,
+  prevIcon,
+  nextIcon,
+} from "../../icons/icon-folder.js";
 import { styles } from "./styles.js";
 
 export class EmployeeList extends LitElement {
@@ -13,6 +20,8 @@ export class EmployeeList extends LitElement {
     itemsPerPage: { type: Number },
     searchQuery: { type: String },
     selectedEmployees: { type: Array },
+    showBulkDeleteModal: { type: Boolean },
+    deletedListItem: { type: Object },    
   };
 
   static styles = styles;
@@ -25,6 +34,8 @@ export class EmployeeList extends LitElement {
     this.itemsPerPage = 10;
     this.searchQuery = "";
     this.selectedEmployees = [];
+    this.showBulkDeleteModal = false;
+    this.deletedListItem = null
   }
 
   connectedCallback() {
@@ -36,7 +47,6 @@ export class EmployeeList extends LitElement {
       const state = store.getState();
 
       this.employees = state.employees.employees;
-      console.log(this.employees)
       this.requestUpdate();
     });
   }
@@ -65,21 +75,6 @@ export class EmployeeList extends LitElement {
     Router.go(`/edit/${employee.id}`);
   }
 
-  handleDelete(employee) {
-    if (confirm(getTranslation("confirm.delete", getCurrentLanguage()))) {
-      store.dispatch({ type: "DELETE_EMPLOYEE", payload: employee.id });
-    }
-  }
-
-  handleSelectAll(e) {
-    if (e.target.checked) {
-      this.selectedEmployees = this.paginatedEmployees.map((emp) => emp.id);
-    } else {
-      this.selectedEmployees = [];
-    }
-    this.requestUpdate();
-  }
-
   handleSelectEmployee(e, employee) {
     if (e.target.checked) {
       this.selectedEmployees = [...this.selectedEmployees, employee.id];
@@ -91,27 +86,79 @@ export class EmployeeList extends LitElement {
     this.requestUpdate();
   }
 
-  handleBulkDelete() {
-    if (this.selectedEmployees.length === 0) return;
+  closeBulkDeleteModal() {
+    this.showBulkDeleteModal = false;
+    this.requestUpdate();
+  }
 
+  confirmBulkDelete() {
+    if (this.deletedListItem) {
+      store.dispatch({ type: "DELETE_EMPLOYEE", payload: this.deletedListItem.id });
+
+      return;
+    }
+
+    this.selectedEmployees.forEach((id) => {
+      store.dispatch({ type: "DELETE_EMPLOYEE", payload: id });
+    });
+
+    this.selectedEmployees = [];
+    this.showBulkDeleteModal = false;
+    this.requestUpdate();
+  }
+
+  handleDeleteAndSelect(e, emp) {
     if (
-      confirm(getTranslation("confirm.deleteMultiple", getCurrentLanguage()))
+      getTranslation("employee.deleteSelected", getCurrentLanguage()) ===
+      e.target.innerText?.split(" (").shift()
     ) {
-      this.selectedEmployees.forEach((id) => {
-        store.dispatch({ type: "DELETE_EMPLOYEE", payload: id });
-      });
-      this.selectedEmployees = [];
+      this.showBulkDeleteModal = true;
+      this.requestUpdate();
+    } else if (e.target instanceof SVGElement || e.target instanceof HTMLSpanElement) {
+      this.showBulkDeleteModal = true;
+      this.deletedListItem = emp;
+      this.requestUpdate();
+    } else if (
+      getTranslation("employee.selecAll", getCurrentLanguage()) ===
+      e.target.innerText
+    ) {
+      const allSelected = this.paginatedEmployees.every((emp) =>
+        this.selectedEmployees.includes(emp.id)
+      );
+
+      if (allSelected) {
+        this.selectedEmployees = this.selectedEmployees.filter(
+          (id) => !this.paginatedEmployees.some((emp) => emp.id === id)
+        );
+      } else {
+        const paginatedIds = this.paginatedEmployees.map((emp) => emp.id);
+        this.selectedEmployees = Array.from(
+          new Set([...this.selectedEmployees, ...paginatedIds])
+        );
+      }
+
+      this.requestUpdate();
     }
   }
 
   get filteredEmployees() {
     return this.employees.filter(
       (emp) =>
-        emp.firstName.toLocaleLowerCase().includes(this.searchQuery.toLocaleLowerCase()) ||
-        emp.lastName.toLocaleLowerCase().includes(this.searchQuery.toLocaleLowerCase()) ||
-        emp.email.toLocaleLowerCase().includes(this.searchQuery.toLocaleLowerCase()) ||
-        emp.department.toLocaleLowerCase().includes(this.searchQuery.toLocaleLowerCase()) ||
-        emp.position.toLocaleLowerCase().includes(this.searchQuery.toLocaleLowerCase())
+        emp.firstName
+          .toLocaleLowerCase()
+          .includes(this.searchQuery.toLocaleLowerCase()) ||
+        emp.lastName
+          .toLocaleLowerCase()
+          .includes(this.searchQuery.toLocaleLowerCase()) ||
+        emp.email
+          .toLocaleLowerCase()
+          .includes(this.searchQuery.toLocaleLowerCase()) ||
+        emp.department
+          .toLocaleLowerCase()
+          .includes(this.searchQuery.toLocaleLowerCase()) ||
+        emp.position
+          .toLocaleLowerCase()
+          .includes(this.searchQuery.toLocaleLowerCase())
     );
   }
 
@@ -150,7 +197,6 @@ export class EmployeeList extends LitElement {
   renderPagination() {
     const lang = getCurrentLanguage();
     const pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-    const isMobile = window.innerWidth <= 768;
 
     return html`
       <div class="pagination">
@@ -213,20 +259,57 @@ export class EmployeeList extends LitElement {
         </div>
       </div>
 
-      ${this.selectedEmployees.length > 0
-        ? html`
-            <div class="bulk-actions">
-              <button class="delete" @click=${this.handleBulkDelete}>
+      <div class="bulk-actions">
+        <button
+          class="select-all"
+          @click=${(e) => this.handleDeleteAndSelect(e)}
+        >
+          ${getTranslation("employee.selecAll", lang)}
+        </button>
+        ${this.selectedEmployees.length > 0
+          ? html`
+              <button
+                class="delete"
+                @click=${(e) => this.handleDeleteAndSelect(e)}
+              >
                 ${getTranslation("employee.deleteSelected", lang)}
                 (${this.selectedEmployees.length})
               </button>
+            `
+          : ""}
+      </div>
+
+      ${this.showBulkDeleteModal
+        ? html`
+            <div class="modal-backdrop" @click=${this.closeBulkDeleteModal}>
+              <div class="modal">
+                <div class="modal-content">
+                  <p class="modal-title">Are you sure ?</p>
+                  <p class="modal-label">
+                    Selected Employee records will be deleted.
+                  </p>
+                  <div class="modal-actions">
+                    <button
+                      @click=${this.confirmBulkDelete}
+                      class="modal-button delete"
+                    >
+                      Proceed
+                    </button>
+                    <button
+                      @click=${this.closeBulkDeleteModal}
+                      class="modal-button cancel"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           `
         : ""}
       ${this.viewMode === "table"
         ? this.renderTableView()
         : this.renderListView()}
-
       ${this.renderPagination()}
     `;
   }
@@ -238,14 +321,7 @@ export class EmployeeList extends LitElement {
         <thead>
           <tr>
             <th>
-              <div class="checkbox-container">
-                <input
-                  type="checkbox"
-                  @change=${this.handleSelectAll}
-                  ?checked=${this.selectedEmployees.length ===
-                  this.paginatedEmployees.length}
-                />
-              </div>
+              <div class="checkbox-container"></div>
             </th>
             <th class="table-title">
               ${getTranslation("employee.firstName", lang)}
@@ -287,6 +363,7 @@ export class EmployeeList extends LitElement {
                 <td>
                   <div class="checkbox-container">
                     <input
+                      class="table-checkbox"
                       type="checkbox"
                       @change=${(e) => this.handleSelectEmployee(e, emp)}
                       ?checked=${this.selectedEmployees.includes(emp.id)}
@@ -304,17 +381,15 @@ export class EmployeeList extends LitElement {
                 </td>
                 <td>${getTranslation(`positions.${emp.position}`, lang)}</td>
                 <td>
-                  <div class="actions">
+                  <div class="table-actions">
                     <span
                       class="action-icon edit"
                       @click=${() => this.handleEdit(emp)}
-                      >${editIcon}</span
-                    >
+                      >${editIcon}</span>
                     <span
                       class="action-icon delete"
-                      @click=${() => this.handleDelete(emp)}
-                      >${trashIcon}</span
-                    >
+                      @click=${(e) => this.handleDeleteAndSelect(e, emp)}
+                      >${trashIcon}</span>
                   </div>
                 </td>
               </tr>
@@ -339,34 +414,55 @@ export class EmployeeList extends LitElement {
               <div class="checkbox-container">
                 <input
                   type="checkbox"
+                  class="list-checkbox"
                   @change=${(e) => this.handleSelectEmployee(e, emp)}
                   ?checked=${this.selectedEmployees.includes(emp.id)}
                 />
                 <div class="item">
-                  <strong>${emp.firstName} ${emp.lastName}</strong>
-                  <div>
-                    ${getTranslation("employee.dateOfEmployment", lang)}:
-                    ${emp.dateOfEmployment}
+                  <div class="item-title">
+                    <strong>${emp.firstName} ${emp.lastName}</strong>
                   </div>
-                  <div>
-                    ${getTranslation("employee.dateOfBirth", lang)}:
-                    ${emp.dateOfBirth}
+                  <div class="item-data">
+                    <div class="item-data-title">
+                      ${getTranslation("employee.dateOfEmployment", lang)}:
+                    </div>
+                    <div class="item-data-value">${emp.dateOfEmployment}</div>
                   </div>
-                  <div>
-                    ${getTranslation("employee.phoneNumber", lang)}:
-                    ${this.formatPhoneNumber(emp.phoneNumber)}
+                  <div class="item-data">
+                    <div class="item-data-title">
+                      ${getTranslation("employee.dateOfBirth", lang)}:
+                    </div>
+                    <div class="item-data-value">${emp.dateOfBirth}</div>
                   </div>
-                  <div>
-                    ${getTranslation("employee.emailAddress", lang)}:
-                    ${emp.email}
+                  <div class="item-data">
+                    <div class="item-data-title">
+                      ${getTranslation("employee.phoneNumber", lang)}:
+                    </div>
+                    <div class="item-data-value">
+                      ${this.formatPhoneNumber(emp.phoneNumber)}
+                    </div>
                   </div>
-                  <div>
-                    ${getTranslation("employee.department", lang)}:
-                    ${getTranslation(`departments.${emp.department}`, lang)}
+                  <div class="item-data">
+                    <div class="item-data-title">
+                      ${getTranslation("employee.emailAddress", lang)}:
+                    </div>
+                    <div class="item-data-value">${emp.email}</div>
                   </div>
-                  <div>
-                    ${getTranslation("employee.position", lang)}:
-                    ${getTranslation(`positions.${emp.position}`, lang)}
+                  <div class="item-data">
+                    <div class="item-data-title">
+                      ${getTranslation("employee.department", lang)}:
+                    </div>
+                    <div class="item-data-value">
+                      ${getTranslation(`departments.${emp.department}`, lang)}
+                    </div>
+                  </div>
+                  <div class="item-data">
+                    <div class="item-data-title">
+                      ${getTranslation("employee.position", lang)}:
+                    </div>
+                    <div class="item-data-value">
+                      ${getTranslation(`positions.${emp.position}`, lang)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -374,13 +470,11 @@ export class EmployeeList extends LitElement {
                 <span
                   class="action-icon edit"
                   @click=${() => this.handleEdit(emp)}
-                  >${editIcon}</span
-                >
+                  >${editIcon}</span>
                 <span
                   class="action-icon delete"
-                  @click=${() => this.handleDelete(emp)}
-                  >${trashIcon}</span
-                >
+                  @click=${(e) => this.handleDeleteAndSelect(e, emp)}
+                  >${trashIcon}</span>
               </div>
             </div>
           `

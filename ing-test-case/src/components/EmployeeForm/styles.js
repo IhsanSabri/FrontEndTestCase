@@ -41,6 +41,7 @@ export const styles = css`
     display: flex;
     gap: 1rem;
     margin-top: 1rem;
+    flex-direction: column;
   }
 
   button {

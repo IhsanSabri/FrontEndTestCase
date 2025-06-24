@@ -30,21 +30,22 @@ export const styles = css`
   }
 
   .bulk-actions {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    flex-direction: column;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    left: 0;
+    display: flex
   }
 
   .bulk-actions button {
     width: 100%;
     justify-content: center;
+    height: 40px;
   }
 
   button {
     padding: 0.5rem 1rem;
     border: none;
-    border-radius: 4px;
     background-color: #3498db;
     color: white;
     cursor: pointer;
@@ -60,6 +61,59 @@ export const styles = css`
 
   button.delete:hover {
     background-color: #c0392b;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .modal {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
+    max-width: 90vw;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .modal-button {
+    border-radius: 8px;
+  }
+
+  .modal-button.cancel {
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #000;
+  }
+
+  .modal-title {
+    margin: 0;
+    color: #ff6200;
+    font-weight: bold;
+    font-size: 24px;
+  }
+
+  .modal-label {
+    font-size: 18px;
   }
 
   .list-icon,
@@ -125,12 +179,32 @@ export const styles = css`
   }
 
   .list-item.selected {
-    background-color: #f0f7ff;
-    border-color: #3498db;
+    border-color: #ff6200;
   }
 
   .list-item .item {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .item-title {
+    margin-bottom: 5px;
+  }
+
+  .item-data {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2px;
+  }
+
+  .item-data-value {
+    font-size: 12px;
+  }
+
+  .item-data-title {
+    font-weight: bold;
+    font-size: 12px;
   }
 
   .pagination {
@@ -139,6 +213,7 @@ export const styles = css`
     gap: 0.5rem;
     margin-top: 2rem;
     align-items: center;
+    margin-bottom: 2rem;
   }
 
   .pagination button {
@@ -193,7 +268,14 @@ export const styles = css`
   .actions {
     display: flex;
     gap: 0.5rem;
+    width: 10%;
+    justify-content: flex-end;
+  }
+
+  table-actions {
     width: 100%;
+    display: flex;
+    gap: 0.5rem;
     justify-content: flex-end;
   }
 
@@ -269,7 +351,11 @@ export const styles = css`
       display: none;
     }
 
-    input {
+    .list-checkbox {
+      width: 15%;
+    }
+
+    .table-checkbox {
       width: 50%;
     }
 

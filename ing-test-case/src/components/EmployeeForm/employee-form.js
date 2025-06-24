@@ -45,9 +45,7 @@ export class EmployeeForm extends LitElement {
   
     if (employee) {
       this.employee = { ...employee };
-      console.log('Loaded employee data:', this.employee);
     } else {
-      console.error('Employee not found');
       Router.go('/');
     }
   }

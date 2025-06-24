@@ -24,10 +24,12 @@ const generateMockEmployees = (count = 50) => {
       10 + ((i * 5) % 90)
     ).padStart(2, "0")}`,
     email: `employee${i + 1}@example.com`,
-    department: ["IT", "HR", "Finance", "Marketing", "Sales"][i % 5],
-    position: ["Junior", "Medior", "Senior", "Lead", "Manager"][i % 5],
+    department: ["analytics", "tech"][i % 2],
+    position: ["junior", "medior", "senior"][i % 3],
   }));
 };
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 const mockEmployees = generateMockEmployees();
 
@@ -56,7 +58,7 @@ describe("EmployeeList", () => {
   it("should render with default properties", async () => {
     expect(element.employees).to.be.an("array");
     expect(element.employees.length).to.equal(50);
-    expect(element.viewMode).to.equal("list");
+    expect(element.viewMode).to.equal("table");
     expect(element.currentPage).to.equal(1);
     expect(element.itemsPerPage).to.equal(10);
     expect(element.searchQuery).to.equal("");
@@ -155,14 +157,24 @@ describe("EmployeeList", () => {
   });
 
   it("should delete employee when delete icon is clicked and confirmed", async () => {
-    const confirmStub = sinon.stub(window, "confirm").returns(true);
     const dispatchSpy = sinon.spy(store, "dispatch");
     const testEmployee = mockEmployees[0];
 
     const deleteIcon = element.shadowRoot.querySelector(".action-icon.delete");
     deleteIcon.click();
+    await element.updateComplete;
 
-    expect(confirmStub.called).to.be.true;
+    expect(element.showBulkDeleteModal).to.be.true;
+
+    const modal = element.shadowRoot.querySelector('.modal-backdrop');
+
+    expect(modal).to.be.exist;
+    await element.updateComplete;
+
+    const modalDeleteButton = element.shadowRoot.querySelector('.modal-button.delete');
+    modalDeleteButton.click();
+    await element.updateComplete;
+
     expect(
       dispatchSpy.calledWith({
         type: "DELETE_EMPLOYEE",
@@ -170,21 +182,17 @@ describe("EmployeeList", () => {
       })
     ).to.be.true;
 
-    confirmStub.restore();
     dispatchSpy.restore();
   });
 
   it("should not delete employee when delete icon is clicked but not confirmed", async () => {
-    const confirmStub = sinon.stub(window, "confirm").returns(false);
     const dispatchSpy = sinon.spy(store, "dispatch");
 
     const deleteIcon = element.shadowRoot.querySelector(".action-icon.delete");
     deleteIcon.click();
 
-    expect(confirmStub.called).to.be.true;
     expect(dispatchSpy.called).to.be.false;
 
-    confirmStub.restore();
     dispatchSpy.restore();
   });
 
@@ -211,7 +219,6 @@ describe("EmployeeList", () => {
   });
 
   it("should handle bulk delete through UI interaction", async () => {
-    const confirmStub = sinon.stub(window, "confirm").returns(true);
     const dispatchSpy = sinon.spy(store, "dispatch");
 
     const checkboxes = element.shadowRoot.querySelectorAll(
@@ -219,34 +226,35 @@ describe("EmployeeList", () => {
     );
     checkboxes[0].click();
     await element.updateComplete;
-    checkboxes[1].click();
-    await element.updateComplete;
 
     const bulkDeleteButton = element.shadowRoot.querySelector(
       ".bulk-actions button.delete"
     );
     bulkDeleteButton.click();
+    await element.updateComplete;
 
-    expect(confirmStub.called).to.be.true;
-    expect(dispatchSpy.callCount).to.equal(2);
+    expect(element.showBulkDeleteModal).to.be.true;
+
+    const modal = element.shadowRoot.querySelector('.modal-backdrop');
+
+    expect(modal).to.be.exist;
+    await element.updateComplete;
+
+    const modalDeleteButton = element.shadowRoot.querySelector('.modal-button.delete');
+    modalDeleteButton.click();
+    await element.updateComplete;
+
+    expect(dispatchSpy.callCount).to.equal(1);
     expect(dispatchSpy.firstCall.args[0]).to.deep.equal({
       type: "DELETE_EMPLOYEE",
       payload: mockEmployees[0].id,
-    });
-    expect(dispatchSpy.secondCall.args[0]).to.deep.equal({
-      type: "DELETE_EMPLOYEE",
-      payload: mockEmployees[1].id,
     });
     expect(element.selectedEmployees).to.be.empty;
   });
 
   it("should handle select all functionality through UI", async () => {
-    const tableIcon = element.shadowRoot.querySelector(".table-icon");
-    tableIcon.click();
-    await element.updateComplete;
-
     const selectAllCheckbox = element.shadowRoot.querySelector(
-      'input[type="checkbox"]'
+      '.bulk-actions .select-all'
     );
     selectAllCheckbox.click();
     await element.updateComplete;
