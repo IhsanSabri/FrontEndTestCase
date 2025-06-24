@@ -4,7 +4,7 @@
   "description": "Employee Management Application using LitElement",
   "main": "index.js",
   "scripts": {
-    "start": "web-dev-server --node-resolve --open --watch",
+    "start": "web-dev-server --config web-dev-server.config.mjs",
     "test": "web-test-runner \"src/**/**/*.test.js\" --node-resolve",
     "test:watch": "web-test-runner \"src/**/*.test.js\" --node-resolve --watch"
   },
