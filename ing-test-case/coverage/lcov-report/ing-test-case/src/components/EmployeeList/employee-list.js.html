@@ -25,28 +25,28 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>487/487</span>
+                <span class='fraction'>492/492</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">97.72% </span>
+                <span class="strong">97.77% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>43/44</span>
+                <span class='fraction'>44/45</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>22/22</span>
+                <span class='fraction'>23/23</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>487/487</span>
+                <span class='fraction'>492/492</span>
             </div>
         
             
@@ -550,7 +550,17 @@
 <a name='L485'></a><a href='#L485'>485</a>
 <a name='L486'></a><a href='#L486'>486</a>
 <a name='L487'></a><a href='#L487'>487</a>
-<a name='L488'></a><a href='#L488'>488</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L488'></a><a href='#L488'>488</a>
+<a name='L489'></a><a href='#L489'>489</a>
+<a name='L490'></a><a href='#L490'>490</a>
+<a name='L491'></a><a href='#L491'>491</a>
+<a name='L492'></a><a href='#L492'>492</a>
+<a name='L493'></a><a href='#L493'>493</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -1074,7 +1084,7 @@ export class EmployeeList extends LitElement {
     this.searchQuery = "";
     this.selectedEmployees = [];
     this.showBulkDeleteModal = false;
-    this.deletedListItem = null
+    this.deletedListItem = null;
   }
 &nbsp;
   connectedCallback() {
@@ -1319,32 +1329,7 @@ export class EmployeeList extends LitElement {
       &lt;/div&gt;
 &nbsp;
       ${this.showBulkDeleteModal
-        ? html`
-            &lt;div class="modal-backdrop" @click=${this.closeBulkDeleteModal}&gt;
-              &lt;div class="modal"&gt;
-                &lt;div class="modal-content"&gt;
-                  &lt;p class="modal-title"&gt;Are you sure ?&lt;/p&gt;
-                  &lt;p class="modal-label"&gt;
-                    Selected Employee records will be deleted.
-                  &lt;/p&gt;
-                  &lt;div class="modal-actions"&gt;
-                    &lt;button
-                      @click=${this.confirmBulkDelete}
-                      class="modal-button delete"
-                    &gt;
-                      Proceed
-                    &lt;/button&gt;
-                    &lt;button
-                      @click=${this.closeBulkDeleteModal}
-                      class="modal-button cancel"
-                    &gt;
-                      Cancel
-                    &lt;/button&gt;
-                  &lt;/div&gt;
-                &lt;/div&gt;
-              &lt;/div&gt;
-            &lt;/div&gt;
-          `
+        ? this.renderModalPopUp()
         : ""}
       ${this.viewMode === "table"
         ? this.renderTableView()
@@ -1521,6 +1506,36 @@ export class EmployeeList extends LitElement {
       &lt;/div&gt;
     `;
   }
+&nbsp;
+  renderModalPopUp() {
+    const lang = getCurrentLanguage();
+    return html`&lt;div class="modal-backdrop" @click=${this.closeBulkDeleteModal}&gt;
+      &lt;div class="modal"&gt;
+        &lt;div class="modal-content"&gt;
+          &lt;p class="modal-title"&gt;
+            ${getTranslation("confirm.title", lang)}
+          &lt;/p&gt;
+          &lt;p class="modal-label"&gt;
+            ${getTranslation("confirm.label", lang)}
+          &lt;/p&gt;
+          &lt;div class="modal-actions"&gt;
+            &lt;button
+              @click=${this.confirmBulkDelete}
+              class="modal-button delete"
+            &gt;
+              ${getTranslation("confirm.proceed", lang)}
+            &lt;/button&gt;
+            &lt;button
+              @click=${this.closeBulkDeleteModal}
+              class="modal-button cancel"
+            &gt;
+              ${getTranslation("confirm.cancel", lang)}
+            &lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;`;
+  }
 }
 &nbsp;
 customElements.define("employee-list", EmployeeList);
@@ -1531,7 +1546,7 @@ customElements.define("employee-list", EmployeeList);
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-06-24T20:55:55.576Z
+                at 2025-06-24T21:20:10.938Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

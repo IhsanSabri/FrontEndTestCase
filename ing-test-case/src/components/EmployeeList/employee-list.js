@@ -35,7 +35,7 @@ export class EmployeeList extends LitElement {
     this.searchQuery = "";
     this.selectedEmployees = [];
     this.showBulkDeleteModal = false;
-    this.deletedListItem = null
+    this.deletedListItem = null;
   }
 
   connectedCallback() {
@@ -280,32 +280,7 @@ export class EmployeeList extends LitElement {
       </div>
 
       ${this.showBulkDeleteModal
-        ? html`
-            <div class="modal-backdrop" @click=${this.closeBulkDeleteModal}>
-              <div class="modal">
-                <div class="modal-content">
-                  <p class="modal-title">${getTranslation("confirm.title", lang)}</p>
-                  <p class="modal-label">
-                    ${getTranslation("confirm.label", lang)}
-                  </p>
-                  <div class="modal-actions">
-                    <button
-                      @click=${this.confirmBulkDelete}
-                      class="modal-button delete"
-                    >
-                      ${getTranslation("confirm.proceed", lang)}
-                    </button>
-                    <button
-                      @click=${this.closeBulkDeleteModal}
-                      class="modal-button cancel"
-                    >
-                      ${getTranslation("confirm.cancel", lang)}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `
+        ? this.renderModalPopUp()
         : ""}
       ${this.viewMode === "table"
         ? this.renderTableView()
@@ -481,6 +456,36 @@ export class EmployeeList extends LitElement {
         )}
       </div>
     `;
+  }
+
+  renderModalPopUp() {
+    const lang = getCurrentLanguage();
+    return html`<div class="modal-backdrop" @click=${this.closeBulkDeleteModal}>
+      <div class="modal">
+        <div class="modal-content">
+          <p class="modal-title">
+            ${getTranslation("confirm.title", lang)}
+          </p>
+          <p class="modal-label">
+            ${getTranslation("confirm.label", lang)}
+          </p>
+          <div class="modal-actions">
+            <button
+              @click=${this.confirmBulkDelete}
+              class="modal-button delete"
+            >
+              ${getTranslation("confirm.proceed", lang)}
+            </button>
+            <button
+              @click=${this.closeBulkDeleteModal}
+              class="modal-button cancel"
+            >
+              ${getTranslation("confirm.cancel", lang)}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>`;
   }
 }
 
