@@ -44,8 +44,10 @@ const translations = {
       date: 'Invalid date format'
     },
     confirm: {
-      delete: 'Are you sure you want to delete this employee?',
-      update: 'Are you sure you want to update this employee?'
+      title: 'Are you sure you want to delete this employee?',
+      label: 'Please confirm to delete the selected employee.',
+      proceed: 'Proceed',
+      cancel: 'Cancel'
     },
     pagination: {
       previous: 'Previous page',
@@ -95,8 +97,10 @@ const translations = {
       date: 'Geçersiz tarih formatı'
     },
     confirm: {
-      delete: 'Bu çalışanı silmek istediğinizden emin misiniz?',
-      update: 'Bu çalışanı güncellemek istediğinizden emin misiniz?'
+      title: 'Bu çalışanı silmek istediğinizden emin misiniz ?',
+      label: 'Seçili çalışanı silmek için lütfen onaylayın.',
+      proceed: 'Onayla',
+      cancel: 'İptal'
     },
     pagination: {
       previous: 'Önceki sayfa',

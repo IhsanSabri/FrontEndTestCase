@@ -37,6 +37,10 @@ export class EmployeeForm extends LitElement {
       this.isEdit = true;
       this.loadEmployeeData();
     }
+
+    this.unsubscribe = store.subscribe(() => {
+      this.requestUpdate();
+    });
   }
 
   loadEmployeeData() {
@@ -120,6 +124,7 @@ export class EmployeeForm extends LitElement {
   }
 
   render() {
+    
     const lang = getCurrentLanguage();
     return html`
       <form @submit=${this.handleSubmit}>

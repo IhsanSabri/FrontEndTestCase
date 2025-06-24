@@ -284,22 +284,22 @@ export class EmployeeList extends LitElement {
             <div class="modal-backdrop" @click=${this.closeBulkDeleteModal}>
               <div class="modal">
                 <div class="modal-content">
-                  <p class="modal-title">Are you sure ?</p>
+                  <p class="modal-title">${getTranslation("confirm.title", lang)}</p>
                   <p class="modal-label">
-                    Selected Employee records will be deleted.
+                    ${getTranslation("confirm.label", lang)}
                   </p>
                   <div class="modal-actions">
                     <button
                       @click=${this.confirmBulkDelete}
                       class="modal-button delete"
                     >
-                      Proceed
+                      ${getTranslation("confirm.proceed", lang)}
                     </button>
                     <button
                       @click=${this.closeBulkDeleteModal}
                       class="modal-button cancel"
                     >
-                      Cancel
+                      ${getTranslation("confirm.cancel", lang)}
                     </button>
                   </div>
                 </div>
